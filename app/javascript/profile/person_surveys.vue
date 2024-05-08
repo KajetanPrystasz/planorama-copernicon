@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid scrollable">
-    <h5>Surveys Taken</h5>
+    <h5>Wypełnione ankiety</h5>
     <loading-overlay :loading="loading">
       <ul v-if="surveys.length" class="option-3">
         <li v-for="survey in surveys" :key="survey.id">
@@ -15,7 +15,7 @@
         </li>
       </ul>
       <div v-if="!surveys.length" class="mt-3">
-        <h5 class="font-italic text-muted">No surveys taken.</h5>
+        <h5 class="font-italic text-muted">Brak wypełnionych ankiet.</h5>
       </div>
     </loading-overlay>
   </div>
@@ -50,7 +50,7 @@ export default {
     person: {
       handler(newVal, oldVal) {
         if(newVal?.id && (newVal?.id != oldVal?.id)) {
-          console.debug("Get surveys for ", newVal.id)
+          console.debug("Pobierz ankiety dla ", newVal.id)
           this.loading = true;
           
           this.getPersonSurveys({person: newVal}).then(data => {

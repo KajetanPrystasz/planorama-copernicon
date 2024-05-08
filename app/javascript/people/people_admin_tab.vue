@@ -4,21 +4,21 @@
           <div class="col-12 col-sm-6 col-lg-4">
             <dt>Status</dt>
             <dd class="font-italic ml-2">{{PERSON_CON_STATE[selected.con_state || 'not_set']}}</dd>
-            <dt>Registered</dt>
+            <dt>Zarejestrowany</dt>
             <dd class="font-italic ml-2">{{selected.registered ? 'Yes' : 'No'}}</dd>
-            <dt>Registration ID</dt>
+            <dt>ID Rezerwacji</dt>
             <dd class="font-italic ml-2">{{selected.registration_number || 'Unknown'}}</dd>
             <!-- TODO: resyn button removed until verify process PLAN-975 -->
             <!-- <b-button @click="resyncPerson" variant="primary" :disabled="selected.reg_id == null">Resync Registration</b-button>             -->
           </div>
           <div class="col-12 col-sm-6 col-lg-4">
-            <dt>Convention Class</dt>
+            <dt>Klasa konwentu</dt>
             <dd class="font-italic ml-2">{{conventionClasses}}</dd>
           </div>
-          <dt class="col-12 mt-2">Comments</dt>
+          <dt class="col-12 mt-2">Komentarze</dt>
           <dd class="col-12">
             <b-form-textarea v-model="comments"></b-form-textarea>
-            <b-button class="float-right mt-1" @click="patchSelected({comments})" variant="primary">Save Comments</b-button>
+            <b-button class="float-right mt-1" @click="patchSelected({comments})" variant="primary">Zapisz komentarze</b-button>
           </dd>
         </dl>
   </div>
