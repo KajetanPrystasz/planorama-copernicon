@@ -3,23 +3,66 @@
     <sidebar-vue v-if="selected" model="session">
       <template #header>
         <h3>{{selected.title}}</h3>
-        <small class="text-muted d-block">Ostatnio zaktualizowane</small>
-        <!-- <small class="text-muted d-block"> by <em><strong>{{selected.updated_by && selected.updated_by.name}}</strong></em></small> -->
-        <small class="text-muted d-block"> w <em><strong>{{new Date(selected.updated_at).toLocaleString()}}</strong></em></small>
+        <div class="d-flex">
+          <div class="d-flex flex-column w-50 p-2 mr-3">
+            <small class="text-muted d-block">Ostatnio zaktualizowane</small>
+            <small class="text-muted d-block"><em><strong>{{new Date(selected.updated_at).toLocaleString()}}</strong></em></small>
+          </div>
+          <div class="d-flex flex-column w-50 p-2">
+            <small class="text-muted d-block">Dodane</small>
+            <small class="text-muted d-block"><em><strong>{{new Date(selected.created_at).toLocaleString()}}</strong></em></small>
+          </div>
+        </div>
       </template>
       <template #content v-if="selected">
         <b-row>
           <b-col>
+            <div class="d-flex">
+              <div class="d-flex flex-column w-25 p-2">
+                <dl>
+                  <dt>Blok:</dt>
+                  <dd class="ml-2">
+                    {{ formattedAreaList }}
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>Typ:</dt>
+                  <dd class="ml-2">
+                    {{ selected.format_value }}
+                  </dd>
+                </dl>
+              </div>
+              <div class="d-flex flex-column w-50 p-2">
+                <dl>
+                  <dt>Prowadzi:</dt>
+                  <dd class="ml-2">
+                    {{ selected.solicitor_published_name }}
+                  </dd>
+                </dl>
+              </div>
+              <div class="d-flex flex-column w-25 p-2 mr-3">
+                <dl>
+                  <dt>Status:</dt>
+                  <dd class="ml-2">
+                    {{SESSION_STATUS[selected.status]}}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
             <dl>
-              <dt>Status:</dt>
-              <dd class="ml-2">
-                {{SESSION_STATUS[selected.status]}}
-              </dd>
               <dt>
                 Opis:
               </dt>
               <dd class="ml-2">
                 <div v-html="selected.description"></div>
+              </dd>
+              <dt>Czas trwania:</dt>
+              <dd class="ml-2">
+                <div v-html="selected.duration"></div>
               </dd>
             </dl>
           </b-col>
@@ -85,14 +128,17 @@
         </div>
         <b-tabs content-class="mt-3" nav-class="border-0" nav-wrapper-class="border-bottom">
           <!-- TODO: more details etc -->
-            <b-tab title="Ogólne" active lazy>
+          <b-tab title="Copernicon" active lazy>
+            <view-copernicon :session="selected"></view-copernicon>
+          </b-tab>
+          <b-tab title="Ogólne">
             <dl>
-              <dt>Obszary</dt>
+              <dt>Blok programowy</dt>
               <dd v-if="selected.area_list.length" class="ml-2 font-italic">{{formattedAreaList}}</dd>
               <dd v-if="!selected.area_list.length" class="ml-2 font-italic text-muted">Brak wybranych</dd>
-              <dt>Format</dt>
+              <dt>Typ punktu programu</dt>
               <dd class="ml-2 font-italic" v-if="selected.format">{{selected.format.name}}</dd>
-              <dd class="ml-2 font-italic text-muted" v-if="!selected.format">Brak wybranego</dd>
+              <dd class="ml-2 font-italic" v-if="!selected.format">{{ selected.format_description }}</dd>
               <dt>Środowisko sesji</dt>
               <dd class="ml-2 font-italic">{{SESSION_ENVIRONMENT[selected.environment]}}</dd>
               <dt>Publiczne tagi</dt>
@@ -166,6 +212,7 @@
 import SidebarVue from '@/components/sidebar_vue';
 import SessionNotes from './session_notes.vue';
 import ViewParticipants from './view_participants';
+import ViewCopernicon from './view_copernicon';
 import {personSessionMixin, modelMixin} from '@/mixins';
 import Detail from './detail.vue';
 import { areaMixin, scheduledMixin, startTimeMixin } from './session_fields.mixin';
@@ -184,6 +231,7 @@ export default {
     Detail,
     SessionNotes,
     ViewParticipants,
+    ViewCopernicon,
     SessionConflicts
   },
   mixins: [

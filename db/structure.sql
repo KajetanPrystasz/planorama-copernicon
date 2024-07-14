@@ -666,7 +666,16 @@ END) STORED,
     global_diaspora character varying,
     non_anglophone character varying,
     fediverse character varying,
-    bsky character varying
+    bsky character varying,
+    of_age_at_convention_time boolean DEFAULT false,
+    phone_number character varying(100) DEFAULT ''::character varying,
+    surname character varying,
+    surname_sort_by character varying,
+    surname_sort_by_confirmed boolean DEFAULT false,
+    custom_published_name character varying,
+    custom_published_name_sort_by character varying,
+    custom_published_name_sort_by_confirmed boolean DEFAULT false,
+    full_name character varying GENERATED ALWAYS AS ((((COALESCE(name, ''::character varying))::text || ' '::text) || (COALESCE(surname, ''::character varying))::text)) STORED
 );
 
 
@@ -749,7 +758,38 @@ CREATE TABLE public.sessions (
     room_set_id uuid,
     room_notes text,
     recorded boolean DEFAULT false NOT NULL,
-    streamed boolean DEFAULT false NOT NULL
+    streamed boolean DEFAULT false NOT NULL,
+    format_description text DEFAULT ''::text,
+    rpg_system character varying,
+    rpg_knowledge_needed boolean,
+    rpg_for_beginners boolean,
+    rpg_number_of_players character varying,
+    rpg_hardness text,
+    team_size character varying,
+    content_warning character varying(1000) DEFAULT ''::character varying,
+    age_restrictions character varying DEFAULT ''::character varying,
+    accessibility character varying(1000) DEFAULT ''::character varying,
+    nope_acknowledgment boolean DEFAULT false,
+    unavailable_10_11 character varying(100),
+    unavailable_11_12 character varying(100),
+    unavailable_12_13 character varying(100),
+    unavailable_13_14 character varying(100),
+    unavailable_14_15 character varying(100),
+    unavailable_15_16 character varying(100),
+    unavailable_16_17 character varying(100),
+    unavailable_17_18 character varying(100),
+    unavailable_18_19 character varying(100),
+    unavailable_19_20 character varying(100),
+    unavailable_20_21 character varying(100),
+    unavailable_21_22 character varying(100),
+    unavailability_notes character varying(500) DEFAULT ''::character varying,
+    is_reused text DEFAULT ''::text,
+    experience character varying(500) DEFAULT ''::character varying,
+    fandom_organization character varying(100),
+    open_for_panel_participation text DEFAULT ''::text,
+    streaming_allowed boolean DEFAULT false,
+    abstract_url character varying,
+    other_proposals character varying DEFAULT ''::character varying
 );
 
 
@@ -3849,6 +3889,14 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20240223134703'),
 ('20240226191153'),
 ('20240303213410'),
-('20240423130325');
+('20240423130325'),
+('20240715190003'),
+('20240715190015'),
+('20240716171805'),
+('20240716192838'),
+('20240716202217'),
+('20240717062101'),
+('20240717111204'),
+('20240717123827');
 
 

@@ -2,7 +2,7 @@
 <div :class="['container-fluid', {'my-3': !readOnly}]" v-if="selected">
   <div class="row">
     <div class="col-8">
-      <h3>{{selected.published_name}}<edit-button v-b-modal.person-top-modal v-if="!readOnly"></edit-button></h3>
+      <h3>{{selected.custom_published_name}}<edit-button v-b-modal.person-top-modal v-if="!readOnly"></edit-button></h3>
       <div>
         Zaimki: <em>{{selected.pronouns}}</em>
       </div>

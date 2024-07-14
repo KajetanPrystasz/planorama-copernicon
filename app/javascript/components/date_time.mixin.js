@@ -18,9 +18,13 @@ export const dateTimeMixin = {
     }
   },
   methods: {
-    formatLocaleDate(date) {
-      let res = DateTime.fromISO(date, {zone: this.tz}).toLocaleString(DateTime.DATETIME_FULL)
-      return res
+    formatLocaleDate(dateString) {
+      const date = DateTime.fromISO(dateString, {zone: this.tz});
+      const res = new Intl.DateTimeFormat('pl-PL', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      }).format(date);
+      return res;
     },
     // Take a Javascript datetime and format it as a time string in the local timezone
     formatLocaleJsDate(date) {

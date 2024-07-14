@@ -19,6 +19,13 @@ export const session_columns = [
     stickyColumn: true
   },
   {
+    key: 'solicitor_name',
+    sortKey: 'sessions.solicitor_name',
+    label: 'Osoba',
+    type: 'text',
+    sortable: false
+  },
+  {
     key: 'description',
     sortKey: 'sessions.description',
     label: 'Opis',
@@ -29,7 +36,7 @@ export const session_columns = [
     key: 'area_list',
     sortKey: 'areas.name',
     search_key: 'area_list',
-    label: 'Obszar',
+    label: 'Blok',
     component: AreaSelectForSearch,
     type: 'custom-component',
     operators: ['is','is not', 'is only', 'is not only', 'is empty','is not empty'],
@@ -37,13 +44,9 @@ export const session_columns = [
     formatter: (value) => value && value.length ? value.join(", ") : value
   },
   {
-    key: 'format.name',
-    label: 'Format',
-    sortKey: 'formats.name',
-    sortable: true,
-    component: FormatSelectForSearch,
-    type: 'custom-component',
-    operators: ['is','is not', 'is empty','is not empty'],
+    key: 'format_value',
+    label: 'Typ',
+    sortable: false
   },
   {
     key: 'tag_list',
@@ -77,7 +80,6 @@ export const session_columns = [
     key: 'duration',
     label: 'Czas trwania',
     type: "text"
-    // todo formatter here
   },
   {
     key: 'room.name',

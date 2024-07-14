@@ -4,7 +4,7 @@
       <div>
         <h5>Tożsamość</h5>
         <div class="d-flex justify-content-between">
-          <dl-person :fields="['name', 'pseudonym']"></dl-person>
+          <dl-person :fields="['full_name', 'pseudonym', 'custom_published_name', 'phone_number', 'of_age_at_convention_time']"></dl-person>
           <registration-link v-if="!readOnly"></registration-link>
         </div>
       </div>

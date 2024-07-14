@@ -53,6 +53,11 @@
           <span>{{formatAreas(item.area_list)}}</span>
         </tooltip-overflow>
       </template>
+      <template #cell(format_value)="{ item }">
+        <tooltip-overflow v-if="item.format_value" :title="item.format_value">
+          <span>{{item.format_value}}</span>
+        </tooltip-overflow>
+      </template>
       <template #cell(tag_list)="{ item }">
         <tooltip-overflow v-if="item.tag_list" :title="formatTags(item.tag_list)">
           <span>{{formatTags(item.tag_list)}}</span>

@@ -1,8 +1,5 @@
 p "Start development session seeds"
 
-return if Session.count > 0
-
-
 unless Format.find_by_name('Panel')
   Format.create!(
     name: 'Panel',

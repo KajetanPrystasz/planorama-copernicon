@@ -1,8 +1,8 @@
 <template>
   <div class="detail">
     <dl>
-      <dt>Nazwa:</dt>
-      <dd class="ml-2">{{ selected.name }}</dd>
+      <dt>Imię i nazwisko:</dt>
+      <dd class="ml-2">{{ selected.full_name }}</dd>
       <dt>Nazwa sortowana według:</dt>
       <dd class="ml-2">{{ selected.name_sort_by | na_if_empty}}</dd>
       <dt>Potwierdzona nazwa sortowana:</dt>
@@ -13,6 +13,10 @@
       <dd class="ml-2">{{ selected.pseudonym_sort_by | na_if_empty}}</dd>
       <dt>Potwierdzony pseudonim sortowany:</dt>
       <dd class="ml-2">{{ selected.pseudonym_sort_by_confirmed ? 'Tak' : 'Nie' }}</dd>
+      <dt>Telefon:</dt>
+      <dd class="ml-2">{{ selected.phone_number | na_if_empty}}</dd>
+      <dt>Ukończone 18 lat w dniu rozpoczęcia konwentu:</dt>
+      <dd class="ml-2">{{ selected.of_age_at_convention_time | na_if_empty}}</dd>
       <dt>Biografia:</dt>
       <dd class="ml-2">
         <span v-html="selected.bio" v-if="selected.bio"></span>

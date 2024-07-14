@@ -3,31 +3,38 @@ import { personScheduleApprovalStateOptionsForSearch } from "@/store/person_sche
 
 export const people_columns = [
   {
-    key: 'published_name',
-    label: 'Opublikowana nazwa',
-    type: "text",
-    sortable: true,
-    class: 'col-name-field',
-    stickyColumn: true
-  },
-  {
-    key: 'name',
+    key: 'full_name',
     label: 'Imię i nazwisko',
     type: "text",
     sortable: true,
     class: 'col-name-field'
   },
   {
-    key: 'pronouns',
-    label: 'Zaimki',
+    key: 'custom_published_name',
+    label: 'W programie jako',
     type: "text",
-    sortable: false
+    sortable: true,
+    class: 'col-name-field',
+    stickyColumn: true
   },
   {
     key: 'primary_email',
     search_key: 'email_addresses.email',
     label: 'Email',
     type: "text",
+    sortable: false
+  },
+  {
+    key: 'phone_number',
+    label: 'Phone',
+    type: "text",
+    sortable: true
+  },
+  {
+    key: 'of_age_at_convention_time',
+    label: '18+',
+    type: 'text',
+    formatter: (value) => value ? 'Tak' : 'Nie',
     sortable: false
   },
   {
@@ -54,6 +61,12 @@ export const people_columns = [
     sortable: true,
     type: "numeric",
     operators: ["equals", "does not equal", "is less than", "is less than or equal to", "is greater than", "is greater than or equal to"]
+  },
+  {
+    key: 'pronouns',
+    label: 'Zaimki',
+    type: "text",
+    sortable: false
   },
   {
     key: 'draft_approval',

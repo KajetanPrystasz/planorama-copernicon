@@ -2,42 +2,73 @@
 #
 # Table name: sessions
 #
-#  id                        :uuid             not null, primary key
-#  audience_size             :integer
-#  description               :text
-#  duration                  :integer
-#  environment               :enum             default("unknown")
-#  instructions_for_interest :text
-#  interest_opened_at        :datetime
-#  interest_opened_by        :string
-#  is_break                  :boolean          default(FALSE)
-#  item_notes                :text
-#  lock_version              :integer          default(0)
-#  maximum_people            :integer
-#  minimum_people            :integer
-#  minors_participation      :jsonb
-#  open_for_interest         :boolean          default(FALSE)
-#  participant_notes         :text
-#  proofed                   :boolean          default(FALSE), not null
-#  pub_reference_number      :integer
-#  publish                   :boolean          default(FALSE), not null
-#  recorded                  :boolean          default(FALSE), not null
-#  require_signup            :boolean          default(FALSE)
-#  room_notes                :text
-#  start_time                :datetime
-#  status                    :enum             default("draft")
-#  streamed                  :boolean          default(FALSE), not null
-#  tech_notes                :text
-#  title                     :string(256)
-#  updated_by                :string
-#  visibility                :enum             default("is_public")
-#  waiting_list_size         :integer          default(0)
-#  created_at                :datetime         not null
-#  updated_at                :datetime         not null
-#  age_restriction_id        :uuid
-#  format_id                 :uuid
-#  room_id                   :uuid
-#  room_set_id               :uuid
+#  id                           :uuid             not null, primary key
+#  abstract_url                 :string
+#  accessibility                :string(1000)     default("")
+#  age_restrictions             :string           default("")
+#  audience_size                :integer
+#  content_warning              :string(1000)     default("")
+#  description                  :text
+#  duration                     :integer
+#  environment                  :enum             default("unknown")
+#  experience                   :string(500)      default("")
+#  fandom_organization          :string(100)
+#  format_description           :text             default("")
+#  instructions_for_interest    :text
+#  interest_opened_at           :datetime
+#  interest_opened_by           :string
+#  is_break                     :boolean          default(FALSE)
+#  is_reused                    :text             default("")
+#  item_notes                   :text
+#  lock_version                 :integer          default(0)
+#  maximum_people               :integer
+#  minimum_people               :integer
+#  minors_participation         :jsonb
+#  nope_acknowledgment          :boolean          default(FALSE)
+#  open_for_interest            :boolean          default(FALSE)
+#  open_for_panel_participation :text             default("")
+#  other_proposals              :string           default("")
+#  participant_notes            :text
+#  proofed                      :boolean          default(FALSE), not null
+#  pub_reference_number         :integer
+#  publish                      :boolean          default(FALSE), not null
+#  recorded                     :boolean          default(FALSE), not null
+#  require_signup               :boolean          default(FALSE)
+#  room_notes                   :text
+#  rpg_for_beginners            :boolean
+#  rpg_hardness                 :text
+#  rpg_knowledge_needed         :boolean
+#  rpg_number_of_players        :string
+#  rpg_system                   :string
+#  start_time                   :datetime
+#  status                       :enum             default("draft")
+#  streamed                     :boolean          default(FALSE), not null
+#  streaming_allowed            :boolean          default(FALSE)
+#  team_size                    :string
+#  tech_notes                   :text
+#  title                        :string(256)
+#  unavailability_notes         :string(500)      default("")
+#  unavailable_10_11            :string(100)
+#  unavailable_11_12            :string(100)
+#  unavailable_12_13            :string(100)
+#  unavailable_13_14            :string(100)
+#  unavailable_14_15            :string(100)
+#  unavailable_15_16            :string(100)
+#  unavailable_16_17            :string(100)
+#  unavailable_17_18            :string(100)
+#  unavailable_18_19            :string(100)
+#  unavailable_19_20            :string(100)
+#  unavailable_20_21            :string(100)
+#  unavailable_21_22            :string(100)
+#  updated_by                   :string
+#  visibility                   :enum             default("is_public")
+#  waiting_list_size            :integer          default(0)
+#  created_at                   :datetime         not null
+#  updated_at                   :datetime         not null
+#  age_restriction_id           :uuid
+#  format_id                    :uuid
+#  room_id                      :uuid
+#  room_set_id                  :uuid
 #
 # Indexes
 #
