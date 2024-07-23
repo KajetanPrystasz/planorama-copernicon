@@ -58,7 +58,7 @@ validationExtend('digits', digits);
 
 validationExtend('required', {
   ...required,
-  message: 'This field is required'
+  message: 'Pole wymagane'
 });
 
 Vue.config.errorHandler = (err, vm, info) => {

@@ -4,7 +4,7 @@
       <div class="col-12">
         <h2>Informacje podstawowe</h2>
         <b-form-group
-          label="Interest Instructions"
+          label="Dodatkowe wymagania"
         >
           <plano-editor
             id="interest-instructions-text"
@@ -17,11 +17,10 @@
     </div>
     <div class="row">
       <div class="col-6">
-
         <pill-display 
           v-model="session_areas"
           @input="saveSession()"
-          label="Areas"
+          label="Blok programowy"
           color="primary"
           :modalOptions="areaOptions"
           :formatter="areaFormatter"
@@ -29,7 +28,7 @@
       </div>
       <div class="col-6">
         <b-form-group
-          label="Format"
+          label="Typ punktu programu"
         >
           <model-select
             id="session-format"
@@ -41,6 +40,231 @@
             :selectSize="4"
           ></model-select>
         </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Ograniczenia wiekowe">
+          <b-form-input id="session-age-restrictions" type="text" v-model="session.age_restrictions" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <pill-display
+          v-model="session.label_list"
+          @input="saveSession()"
+          label="Admin Labels"
+          color="info"
+          :modalOptions="sessionLabelsOptions"
+        ></pill-display>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Content warning">
+          <b-textarea id="session-content-warning" v-model="session.content_warning" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Ułatwienia dostępu">
+          <b-textarea id="session-accessibility" v-model="session.accessibility" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h3>Dostępność</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 10-11">
+          <b-form-input id="session-unavailable-10-11" type="text" v-model="session.unavailable_10_11" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 16-17">
+          <b-form-input id="session-unavailable-16-17" type="text" v-model="session.unavailable_16_17" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 11-12">
+          <b-form-input id="session-unavailable-11-12" type="text" v-model="session.unavailable_11_12" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 17-18">
+          <b-form-input id="session-unavailable-17-18" type="text" v-model="session.unavailable_17_18" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 12-13">
+          <b-form-input id="session-unavailable-12-13" type="text" v-model="session.unavailable_12_13" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 18-19">
+          <b-form-input id="session-unavailable-18-19" type="text" v-model="session.unavailable_18_19" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 13-14">
+          <b-form-input id="session-unavailable-13-14" type="text" v-model="session.unavailable_13_14" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 19-20">
+          <b-form-input id="session-unavailable-19-20" type="text" v-model="session.unavailable_19_20" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 14-15">
+          <b-form-input id="session-unavailable-14-15" type="text" v-model="session.unavailable_14_15" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 20-21">
+          <b-form-input id="session-unavailable-20-21" type="text" v-model="session.unavailable_20_21" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Niedostępność 15-16">
+          <b-form-input id="session-unavailable-15-16" type="text" v-model="session.unavailable_15_16" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="col-6">
+        <b-form-group label="Niedostępność 21-22">
+          <b-form-input id="session-unavailable-21-22" type="text" v-model="session.unavailable_21_22" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Niedostępność - uwagi">
+          <b-form-textarea id="session-unavailability-notes" type="text" v-model="session.unavailability_notes" @blur="saveSession()"></b-form-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Współprowadzenie">
+          <b-form-input id="session-participant-notes" type="text" v-model="session.participant_notes" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Wymagania techniczne">
+          <b-textarea id="session-tech-notes" v-model="session.tech_notes" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Czy punkt programu był prezentowany wcześniej?">
+          <b-textarea id="session-is-reused" v-model="session.is_reused" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Doświadczenie programowe">
+          <b-textarea id="session-experience" v-model="session.experience" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Organizacja fandomowa">
+          <b-textarea id="session-fandom-organization" v-model="session.fandom_organization" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Dopuszczam uczestnictwo w panelach o tematyce">
+          <b-textarea id="session-open-for-panel-participation" v-model="session.open_for_panel_participation" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Zgoda na rejestrację audio/video" class="form-inline mb-4">
+          <span>Nie</span>
+          <b-form-checkbox id="session-streaming-allowed" inline switch v-model="session.streaming_allowed" @change="saveSession()">Tak</b-form-checkbox>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Zgłoszony inny punkt programu?">
+          <b-textarea id="session-other-proposals" v-model="session.other_proposals" @blur="saveSession()"></b-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Abstrakt">
+          <b-form-input id="session-abstract-url" type="text" v-model="session.abstract_url" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h3>RPG</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="System">
+          <b-form-input id="session-rpg-system" type="text" v-model="session.rpg_system" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Wymagana znajomość systemu/mechaniki?" class="form-inline mb-4">
+          <span>Nie</span>
+          <b-form-checkbox id="session-knowledge-needed" inline switch v-model="session.rpg_knowledge_needed" @change="saveSession()">Tak</b-form-checkbox>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <b-form-group label="Dla początkujących graczy?" class="form-inline mb-4">
+          <span>Nie</span>
+          <b-form-checkbox id="session-rpg-for-beginners" inline switch v-model="session.rpg_for_beginners" @change="saveSession()">Tak</b-form-checkbox>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Liczba graczy">
+          <b-form-input id="session-rpg-number-of-players" type="text" v-model="session.rpg_number_of_players" @blur="saveSession()"></b-form-input>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <b-form-group label="Twardość podejścia">
+          <b-form-textarea id="session-rpg-hardness" type="text" v-model="session.rpg_hardness" @blur="saveSession()"></b-form-textarea>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h3>Inne</h3>
       </div>
     </div>
     <div class="row">
@@ -102,58 +326,6 @@
           color="warning"
           :modalOptions="sessionTagsOptions"
         ></pill-display>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-6">
-        <b-form-group label="Attendee Age Restrictions">
-          <b-form-radio-group id="session-age-restriction" stacked name="age_restriction" :options="ageRestrictionOptions" v-model="session.age_restriction_id" @change="saveSession()"></b-form-radio-group>
-        </b-form-group>
-      </div>
-      <div class="col-6">
-        <pill-display
-          v-model="session.label_list"
-          @input="saveSession()"
-          label="Admin Labels"
-          color="info"
-          :modalOptions="sessionLabelsOptions"
-        ></pill-display>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <b-form-group label="Minors Participation">
-          <b-form-checkbox-group id="session-minor-participation" stacked :options="minorsParticipationOptions" v-model="minors_participation" @change="saveSession()" name="minors_participation">
-          </b-form-checkbox-group>
-        </b-form-group>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <b-form-group label="Required Room Features/Services">
-          <b-textarea id="session-room-feature" v-model="session.room_notes" @blur="saveSession()"></b-textarea>
-        </b-form-group>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <b-form-group
-          label="Scheduled Participant Notes"
-        >
-          <plano-editor
-            id="scheduled-participant-text"
-            v-model="session.participant_notes"
-            type='classic'
-            @change="saveSession()"
-          ></plano-editor>
-        </b-form-group>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <b-form-group label="Tech/Hotel Notes">
-          <b-textarea id="session-tech-notes" v-model="session.tech_notes" @blur="saveSession()"></b-textarea>
-        </b-form-group>
       </div>
     </div>
   </div>

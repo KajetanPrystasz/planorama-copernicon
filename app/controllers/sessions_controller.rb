@@ -476,6 +476,7 @@ class SessionsController < ResourceController
       tag_list
       label_list
       session_areas_attributes
+      areas
       proofed
       format_id
       status
@@ -486,6 +487,34 @@ class SessionsController < ResourceController
       room_notes
       recorded
       streamed
+      content_warning
+      age_restrictions
+      accessibility
+      is_reused
+      experience
+      fandom_organization
+      open_for_panel_participation
+      streaming_allowed
+      abstract_url
+      other_proposals
+      rpg_system
+      rpg_knowledge_needed
+      rpg_for_beginners
+      rpg_number_of_players
+      rpg_hardness
+      unavailable_10_11
+      unavailable_11_12
+      unavailable_12_13
+      unavailable_13_14
+      unavailable_14_15
+      unavailable_15_16
+      unavailable_16_17
+      unavailable_17_18
+      unavailable_18_19
+      unavailable_19_20
+      unavailable_20_21
+      unavailable_21_22
+      unavailability_notes
     ]
   end
 end

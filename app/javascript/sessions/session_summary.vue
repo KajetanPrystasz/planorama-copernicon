@@ -17,6 +17,19 @@
         </b-form-group>
         <b-form-group
           class="mx-3"
+          id="session-duration-group"
+          label="Czas trwania"
+          label-for="session-duration"
+        >
+          <b-form-input
+            id="session-duration"
+            type="text"
+            v-model="session.duration"
+            @blur="saveSession()"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group
+          class="mx-3"
           id="session-description-group"
           label="Opis sesji"
           label-for="session-description"
@@ -45,6 +58,10 @@
         </b-form-group>
       </div>
       <div class='ml-auto' v-if="session">
+        <small class="text-muted d-block">
+          Dodano:
+          <em>{{new Date(session.created_at).toLocaleString()}}</em>
+        </small>
         <small class="text-muted d-block">
           Ostatnio edytowane przez:
           <em>{{session.updated_by}}</em>

@@ -98,6 +98,8 @@ export default {
       }
       if (this.height) local_config.height = this.height
 
+      local_config.versionCheck = false;
+
       return local_config
     }
   },

@@ -609,11 +609,18 @@ class PeopleController < ResourceController
       name
       name_sort_by
       name_sort_by_confirmed
+      surname
+      surname_sort_by
+      surname_sort_by_confirmed
       pseudonym
       pseudonym_sort_by
       pseudonym_sort_by_confirmed
+      custom_published_name
+      custom_published_name_sort_by
+      custom_published_name_sort_by_confirmed
       convention_roles_attributes
       email_addresses_attributes
+      phone_number
       bio
       website
       twitter
@@ -650,6 +657,7 @@ class PeopleController < ResourceController
       needs_accommodations
       accommodations
       willing_to_moderate
+      of_age_at_convention_time
       othered
       indigenous
       black_diaspora

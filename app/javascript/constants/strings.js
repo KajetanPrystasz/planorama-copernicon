@@ -1,7 +1,22 @@
+const SESSION_SAVE_SUCCESS = "Sesja została pomyślnie zapisana.";
+const PERSON_SAVE_SUCCESS = "Rekord profilu został pomyślnie zapisany";
+
 const twoLines = (line1, line2) => (h) =>  h('p', {}, [line1, h('br'), line2]);
 const errorMessage = (message) => (errorCode) => twoLines(message, `Kod błędu: ${errorCode}`);
 const titleCase = (model) => `${model.substring(0, 1).toUpperCase()}${model.substring(1)}`;
 const nLines = (lines) => (h) => h('p', {}, lines.reduce((p, c) => [...p, c, h('br')], []));
+const modelSaveSuccessMessage = (model) => {
+    switch (model) {
+        case 'session':
+            return SESSION_SAVE_SUCCESS;
+            break;
+        case 'person':
+            return PERSON_SAVE_SUCCESS;
+            break;
+        default:
+            return `${titleCase(model)} - pomyślnie zapisano.`;
+    }
+};
 
 module.exports = {
     // login page
@@ -72,7 +87,7 @@ module.exports = {
     ADMIN_ADD_USER_SUCCESS: (name) => `${name} pomyślnie dodany do Planoramy.`,
     ADMIN_ADD_USER_ERROR: (name) => errorMessage(`Nie udało się dodać użytkownika ${name} do Planoramy.`),
     IEA_FAILURE_TO_SIGN: "Jako członek personelu nie możesz kontynuować bez wyrażenia zgody na zasady etyki i ochrony danych.",
-    MODEL_SAVE_SUCCESS: (model) => `${titleCase(model)} pomyślnie zapisany.`,
+    MODEL_SAVE_SUCCESS: (model) => modelSaveSuccessMessage(model, this),
     MODEL_SAVE_ERROR: (model) => errorMessage(`Nie udało się zapisać ${titleCase(model)}.`),
     MODEL_ADD_SUCCESS: (model) => `${titleCase(model)} pomyślnie dodany.`,
     MODEL_ADD_ERROR: (model) => errorMessage(`Nie udało się dodać ${titleCase(model)}.`),
@@ -120,7 +135,7 @@ module.exports = {
 
     SESSION_SAVE_SUCCESS_DELETE: "Sesja została pomyślnie usunięta.",
     SESSION_SAVE_ERROR_DELETE: errorMessage("Nie udało się usunąć sesji."),
-    SESSION_SAVE_SUCCESS: "Sesja została pomyślnie zapisana.",
+    SESSION_SAVE_SUCCESS: SESSION_SAVE_SUCCESS,
     SESSION_SAVE_ERROR: errorMessage("Nie udało się zapisać sesji."),
 
     SESSION_RANKING_ERROR: (total, allowed) => `Przypisałeś/aś ${total}, co przekracza dozwoloną liczbę ${allowed}.`,
@@ -265,9 +280,9 @@ module.exports = {
         name: "Imię",
         full_name: "Imię i nazwisko",
         pseudonym: "Pseudonim",
-        custom_published_name: "W programie jako:",
+        custom_published_name: "W programie jako",
         phone_number: "Telefon",
-        of_age_at_convention_time: "Ukończone 18 lat w dniu rozp. konwentu?",
+        of_age_at_convention_time: "Ukończone 18 lat w dniu rozpoczęcia konwentu?",
         languages_fluent_in: "Znajomość języków",
         can_share: "Zezwolenie na udostępnianie adresu e-mail innym uczestnikom",
         attendance_type: "Bierze udział w konwencie",
@@ -279,7 +294,7 @@ module.exports = {
         non_anglophone: "Reprezentuje coś innego niż czysto anglojęzyczna perspektywa",
         excluded_demographic_categories: "Kategorie demograficzne uczestnika, które nie powinny być omawiane na panelach, w których uczestniczy",
     },
-    PERSON_SAVE_SUCCESS: "Rekord profilu został pomyślnie zapisany",
+    PERSON_SAVE_SUCCESS: PERSON_SAVE_SUCCESS,
     PERSON_NEVER_LOGGED_IN: "Nigdy nie zalogowano",
     PERSON_DISABLED_LINK: "Możesz połączyć tylko swoje własne konto rejestracyjne",
     PERSON_DISABLED_UNLINK: "Możesz odłączyć tylko swoje własne konto rejestracyjne",

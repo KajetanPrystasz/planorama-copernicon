@@ -47,7 +47,7 @@
           <dt>Organizacja fandomowa</dt>
           <dd v-if="session.fandom_organization" class="ml-2 font-italic">{{ session.fandom_organization }}</dd>
           <dd v-if="!session.fandom_organization" class="ml-2 font-italic text-muted">Brak</dd>
-          <dt>Zgoda na uczestnictwo w panelach?</dt>
+          <dt>Dopuszczam uczestnictwo w panelach o tematyce</dt>
           <dd v-if="session.open_for_panel_participation" class="ml-2 font-italic">{{ session.open_for_panel_participation }}</dd>
           <dd v-if="!session.open_for_panel_participation" class="ml-2 font-italic text-muted">Nie</dd>
           <dt>Zgoda na rejestrację audio/wideo proponowanej atrakcji programowej?</dt>
