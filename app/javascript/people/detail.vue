@@ -1,41 +1,45 @@
 <template>
   <div class="detail">
     <dl>
-      <dt>Name:</dt>
-      <dd class="ml-2">{{ selected.name }}</dd>
-      <dt>Name Sort By:</dt>
+      <dt>Imię i nazwisko:</dt>
+      <dd class="ml-2">{{ selected.full_name }}</dd>
+      <dt>Nazwa sortowana według:</dt>
       <dd class="ml-2">{{ selected.name_sort_by | na_if_empty}}</dd>
-      <dt>Name Sort By Confirmed:</dt>
-      <dd class="ml-2">{{ selected.name_sort_by_confirmed ? 'Y' : 'N' }}</dd>
-      <dt>Pseudonym:</dt>
+      <dt>Potwierdzona nazwa sortowana:</dt>
+      <dd class="ml-2">{{ selected.name_sort_by_confirmed ? 'Tak' : 'Nie' }}</dd>
+      <dt>Pseudonim:</dt>
       <dd class="ml-2">{{ selected.pseudonym | na_if_empty}}</dd>
-      <dt>Pseudonym Sort By:</dt>
+      <dt>Pseudonim sortowany według:</dt>
       <dd class="ml-2">{{ selected.pseudonym_sort_by | na_if_empty}}</dd>
-      <dt>Pseudonym Sort By Confirmed:</dt>
-      <dd class="ml-2">{{ selected.pseudonym_sort_by_confirmed ? 'Y' : 'N' }}</dd>
-      <dt>Bio:</dt>
+      <dt>Potwierdzony pseudonim sortowany:</dt>
+      <dd class="ml-2">{{ selected.pseudonym_sort_by_confirmed ? 'Tak' : 'Nie' }}</dd>
+      <dt>Telefon:</dt>
+      <dd class="ml-2">{{ selected.phone_number | na_if_empty}}</dd>
+      <dt>Ukończone 18 lat w dniu rozpoczęcia konwentu:</dt>
+      <dd class="ml-2">{{ selected.of_age_at_convention_time | na_if_empty}}</dd>
+      <dt>Biografia:</dt>
       <dd class="ml-2">
         <span v-html="selected.bio" v-if="selected.bio"></span>
-        <span v-else>N/A</span>
+        <span v-else>Nie dotyczy</span>
       </dd>
-      <dt>Pronouns:</dt>
+      <dt>Zaimki osobowe:</dt>
       <dd class="ml-2">{{ selected.pronouns | na_if_empty}}</dd>
-      <dt>Job Title:</dt>
+      <dt>Tytuł zawodowy:</dt>
       <dd class="ml-2">{{ selected.job_title | na_if_empty}}</dd>
-      <dt>Organization:</dt>
+      <dt>Organizacja:</dt>
       <dd class="ml-2">{{ selected.organization | na_if_empty}}</dd>
-      <dt>Registered:</dt>
-      <dd class="ml-2">{{ selected.registered ? 'Y' : 'N' }}</dd>
-      <dt>Opted In:</dt>
-      <dd class="ml-2">{{ selected.opted_in ? 'Y' : 'N'}}</dd>
-      <dt>Can Share:</dt>
-      <dd class="ml-2">{{ selected.can_share ? 'Y' : 'N' }}</dd>
-      <dt>Can Photo:</dt>
-      <dd class="ml-2">{{ selected.can_photo === "yes" ? 'Y' : 'N' }}</dd>
-      <dt>Can Stream:</dt>
-      <dd class="ml-2">{{ selected.can_stream === "yes" ? 'Y' : 'N' }}</dd>
-      <dt>Can Record:</dt>
-      <dd class="ml-2">{{ selected.can_record === "yes" ? 'Y' : 'N' }}</dd>
+      <dt>Zarejestrowany:</dt>
+      <dd class="ml-2">{{ selected.registered ? 'Tak' : 'Nie' }}</dd>
+      <dt>Wyraził zgodę:</dt>
+      <dd class="ml-2">{{ selected.opted_in ? 'Tak' : 'Nie'}}</dd>
+      <dt>Może udostępniać:</dt>
+      <dd class="ml-2">{{ selected.can_share ? 'Tak' : 'Nie' }}</dd>
+      <dt>Może być fotografowany:</dt>
+      <dd class="ml-2">{{ selected.can_photo === "yes" ? 'Tak' : 'Nie' }}</dd>
+      <dt>Może być nagrywany:</dt>
+      <dd class="ml-2">{{ selected.can_stream === "yes" ? 'Tak' : 'Nie' }}</dd>
+      <dt>Może być rejestrowany:</dt>
+      <dd class="ml-2">{{ selected.can_record === "yes" ? 'Tak' : 'Nie' }}</dd>
     </dl>
   </div>
 </template>

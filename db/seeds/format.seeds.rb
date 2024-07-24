@@ -1,52 +1,17 @@
 p "Start format seeds"
 
-unless Format.find_by_name('Panel')
-  Format.create!(
-    name: 'Panel',
-    position: 1
-  )
-end
+Format.find_by_name('Panel').destroy if Format.find_by_name('Panel')
+Format.find_by_name('Presentation').destroy if Format.find_by_name('Presentation')
+Format.find_by_name('Workshop').destroy if Format.find_by_name('Workshop')
+Format.find_by_name('Discussion').destroy if Format.find_by_name('Discussion')
+Format.find_by_name('Interview').destroy if Format.find_by_name('Interview')
+Format.find_by_name('Meetup').destroy if Format.find_by_name('Meetup')
+Format.find_by_name('Other').destroy if Format.find_by_name('Other')
 
-unless Format.find_by_name('Presentation')
-  Format.create!(
-    name: 'Presentation',
-    position: 2
-  )
-end
-
-unless Format.find_by_name('Workshop')
-  Format.create!(
-    name: 'Workshop',
-    position: 3
-  )
-end
-
-unless Format.find_by_name('Discussion')
-  Format.create!(
-    name: 'Discussion',
-    position: 4
-  )
-end
-
-unless Format.find_by_name('Interview')
-  Format.create!(
-    name: 'Interview',
-    position: 5
-  )
-end
-
-unless Format.find_by_name('Meetup')
-  Format.create!(
-    name: 'Meetup',
-    position: 6
-  )
-end
-
-unless Format.find_by_name('Other')
-  Format.create!(
-    name: 'Other',
-    position: 7
-  )
-end
+Format.create!(name: 'Prelekcja', position: 1) unless Format.find_by_name('Prelekcja')
+Format.create!(name: 'Wykład konferencyjny', position: 2) unless Format.find_by_name('Wykład konferencyjny')
+Format.create!(name: 'Konkurs', position: 3) unless Format.find_by_name('Konkurs')
+Format.create!(name: 'Sesja RPG', position: 4) unless Format.find_by_name('Sesja RPG')
+Format.create!(name: 'Larp', position: 5) unless Format.find_by_name('Larp')
 
 p "End format seeds"

@@ -2,7 +2,7 @@
   <div>
     <dt>{{sessionRoleLabel || sessionRoleName}}</dt>
     <dd v-if="!myAssignments.length" class="text-muted font-italic ml-2">None Assigned</dd>
-    <dd v-for="{person} in myAssignments" :key="person.id" class="ml-2"><router-link :to="'/people/edit/' + person.id">{{person.published_name}}</router-link></dd>
+    <dd v-for="{person} in myAssignments" :key="person.id" class="ml-2"><router-link :to="'/people/edit/' + person.id">{{person.custom_published_name}}</router-link></dd>
   </div>
 </template>
 

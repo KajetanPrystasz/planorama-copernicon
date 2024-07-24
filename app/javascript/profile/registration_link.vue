@@ -5,14 +5,14 @@
     <form :action="registrationIntegration.endpoint + '?redirect=profile'" method="post">
       <input type="hidden" v-model="csrfToken" name="authenticity_token" />
       <disabled-tooltip :disabled="!isSelf" :disabledTooltip="PERSON_DISABLED_LINK">
-        <b-button variant="info" size="sm" type="submit" :disabled="!isSelf">Link To Registration</b-button>
+        <b-button variant="info" size="sm" type="submit" :disabled="!isSelf">Powiąż z rejestracją</b-button>
       </disabled-tooltip>
     </form>
     <div class="font-italic"><a @click.prevent @keyup.prevent v-b-modal.linkExplanation href="">{{ PROFILE_LINK_EXPLAINATION_TITLE }}</a></div>
   </div>
   <div v-if="currentUserLinked">
     <disabled-tooltip :disabled="!isSelf" :disabledTooltip="PERSON_DISABLED_UNLINK">
-      <b-button variant="link" v-b-modal.confirmUnlink :disabled="!isSelf">Unlink Registration</b-button>
+      <b-button variant="link" v-b-modal.confirmUnlink :disabled="!isSelf">Rozłącz z rejestracją</b-button>
     </disabled-tooltip>
     <dl-person class="align-with-link pt-2" :fields="['registration_number']"></dl-person>
   </div>

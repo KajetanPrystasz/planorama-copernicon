@@ -78,6 +78,7 @@ class SessionsController < ResourceController
     sheet = params[:sheet]
     ignore_first_line = params[:ignore_first_line]
     count = 0
+    person_count = 0
     sheet_length = sheet.length
     errored_rows = []
     current_row_nbr = -1
@@ -89,65 +90,185 @@ class SessionsController < ResourceController
         count += 1
         next
       end
+      if row[0].to_s.strip == ''
+        sheet_length -= 1
+        next
+      end
 
-      areas = row[0].split(",")
-      title = row[1]
-      description = row[2]
-      # format = row[3]
-      goh_notes = row[4]
-      interest_open = row[5]
-      interest_instructions = row[6]
-      tags = row[7]
-      notes = row[8]
+      row = row.map(&:to_s).map(&:strip)
 
-      # Rails.logger.debug("***** ROW #{row}")
-      # Rails.logger.debug("***** ROW #{row[4]} - #{row[5]}")
+      to_bool = -> (value, truthy_value = 'tak') {
+        value.downcase == truthy_value
+      }
+
+      to_nil = -> (value, &closure) {
+        if value.to_s == ''
+          nil
+        else
+          (closure.nil? ? value : closure.call(value))
+        end
+      }
+
+      excel_to_datetime = -> (value) {
+        base_date = DateTime.new(1900, 1, 1)
+        value_adjusted = value.to_f - 2
+        
+        base_date + value_adjusted - 2.0 / 24
+      }
+
+      # Person
+
+      email_address = row[1]
+      name = row[2]
+      surname = row[3]
+      pseudonym = row[4]
+      published_name = row[5]
+      of_age_at_convention_time = to_bool.call(row[6], 'Tak, będę mieć ukończone 18 lat.'.downcase)
+      phone_number = row[7]
+
+      person = Person.transaction do
+        email_record = EmailAddress.find_by(email: email_address)
+        if email_record && email_record.person
+          email_record.person
+        else
+          new_person = Person.create(
+            name: name,
+            name_sort_by: name,
+            surname: surname,
+            surname_sort_by: surname,
+            pseudonym: pseudonym,
+            pseudonym_sort_by: pseudonym,
+            custom_published_name: published_name,
+            custom_published_name_sort_by: published_name,
+            of_age_at_convention_time: of_age_at_convention_time,
+            phone_number: phone_number
+          )
+          email = EmailAddress.create(
+            person: new_person,
+            email: email_address,
+            isdefault: true,
+            is_valid: true
+          )
+          ConventionRole.create!(
+            person: new_person,
+            role: ConventionRole.roles[:participant]
+          )
+
+          person_count += 1
+          new_person
+        end
+      end
+
+      # Session
+
+      created_at = excel_to_datetime.call(row[0])
+      participant_notes = row[8]
+      area = Area.find_by(name: row[9])
+      format_description = row[10]
+      format = Format.find_by(name: format_description)
+      title = row[11]
+      description = row[12]
+      duration = row[13].to_i
+      rpg_system = to_nil.call(row[14])
+      rpg_knowledge_needed = to_nil.call(row[15], &to_bool)
+      rpg_for_beginners = to_nil.call(row[16], &to_bool)
+      rpg_number_of_players = to_nil.call(row[17])
+      rpg_hardness = to_nil.call(row[18])
+      instructions_for_interest = to_nil.call(row[19])
+      team_size = to_nil.call(row[20])
+      tech_notes = to_nil.call(row[21])
+      content_warning = row[22]
+      age_restrictions = row[23]
+      accessibility = row[24]
+      unavailable_10_11 = to_nil.call(row[26])
+      unavailable_11_12 = to_nil.call(row[27])
+      unavailable_12_13 = to_nil.call(row[28])
+      unavailable_13_14 = to_nil.call(row[29])
+      unavailable_14_15 = to_nil.call(row[30])
+      unavailable_15_16 = to_nil.call(row[31])
+      unavailable_16_17 = to_nil.call(row[32])
+      unavailable_17_18 = to_nil.call(row[33])
+      unavailable_18_19 = to_nil.call(row[34])
+      unavailable_19_20 = to_nil.call(row[35])
+      unavailable_20_21 = to_nil.call(row[36])
+      unavailable_21_22 = to_nil.call(row[37])
+      unavailability_notes = row[38]
+      is_reused = row[39]
+      experience = row[40]
+      fandom_organization = to_nil.call(row[41])
+      open_for_panel_participation = row[42]
+      streaming_allowed = to_bool.call(row[43])
+      abstract_url = to_nil.call(row[44])
+      other_proposals = row[46]
+
       if title && (title.length > 0)
-        # Rails.logger.error "***** #{title}"
-        # Rails.logger.error "***** #{notes} \n #{goh_notes}"
-        if Session.find_by title: title.strip
+        if Session.find_by title: title
           errored_rows << current_row_nbr
           duplicate_session += 1
           next
         end
 
-        format = Format.find_or_create_by(name: row[3].strip)
-
         Session.transaction do
-          session = Session.create!(
-            title: title.strip,
-            description: description.strip,
-            open_for_interest: interest_open && interest_open == 'Yes',
-            instructions_for_interest: interest_instructions.strip,
-            item_notes: [notes, goh_notes].join("\n").strip,
+          session = Session.create(
+            title: title,
+            description: description,
+            areas: [area],
             format: format,
-            duration: 60
+            format_description: format_description,
+            duration: duration,
+            participant_notes: participant_notes,
+            rpg_system: rpg_system,
+            rpg_knowledge_needed: rpg_knowledge_needed,
+            rpg_for_beginners: rpg_for_beginners,
+            rpg_number_of_players: rpg_number_of_players,
+            rpg_hardness: rpg_hardness,
+            instructions_for_interest: instructions_for_interest,
+            team_size: team_size,
+            tech_notes: tech_notes,
+            content_warning: content_warning,
+            age_restrictions: age_restrictions,
+            accessibility: accessibility,
+            unavailable_10_11: unavailable_10_11,
+            unavailable_11_12: unavailable_11_12,
+            unavailable_12_13: unavailable_12_13,
+            unavailable_13_14: unavailable_13_14,
+            unavailable_14_15: unavailable_14_15,
+            unavailable_15_16: unavailable_15_16,
+            unavailable_16_17: unavailable_16_17,
+            unavailable_17_18: unavailable_17_18,
+            unavailable_18_19: unavailable_18_19,
+            unavailable_19_20: unavailable_19_20,
+            unavailable_20_21: unavailable_20_21,
+            unavailable_21_22: unavailable_21_22,
+            unavailability_notes: unavailability_notes,
+            is_reused: is_reused,
+            experience: experience,
+            fandom_organization: fandom_organization,
+            open_for_panel_participation: open_for_panel_participation,
+            streaming_allowed: streaming_allowed,
+            abstract_url: abstract_url,
+            created_at: created_at,
+            other_proposals: other_proposals
           )
-
-          # NOTE: we are not worried about tags as yet
-          # tags
-
-          primary = true
-          areas.each do |area_name|
-            area = Area.find_or_create_by(name: area_name.strip)
-            SessionArea.create!(
-              session: session,
-              area: area,
-              primary: primary
-            )
-            primary = false
-          end
+          role = SessionAssignmentRoleType.find_by(name: 'Participant')
+          SessionAssignment.create!(
+            person: person,
+            session: session,
+            session_assignment_role_type: role
+          )
+          count += 1
         end
-
-        count += 1
       else
         errored_rows << current_row_nbr
         no_title += 1
       end
+
+      # Rails.logger.debug("***** ROW #{row}")
+      # Rails.logger.debug("***** ROW #{row[4]} - #{row[5]}")
     end
 
     count = count - 1 if ignore_first_line
-    message = "Imported #{count} sessions, skipped #{sheet_length - count}"
+    Rails.logger.debug("Imported #{person_count} people, #{count} sessions, skipped #{sheet_length - count}.")
 
     message = {
       imported: "#{count}",
@@ -355,6 +476,7 @@ class SessionsController < ResourceController
       tag_list
       label_list
       session_areas_attributes
+      areas
       proofed
       format_id
       status
@@ -365,6 +487,34 @@ class SessionsController < ResourceController
       room_notes
       recorded
       streamed
+      content_warning
+      age_restrictions
+      accessibility
+      is_reused
+      experience
+      fandom_organization
+      open_for_panel_participation
+      streaming_allowed
+      abstract_url
+      other_proposals
+      rpg_system
+      rpg_knowledge_needed
+      rpg_for_beginners
+      rpg_number_of_players
+      rpg_hardness
+      unavailable_10_11
+      unavailable_11_12
+      unavailable_12_13
+      unavailable_13_14
+      unavailable_14_15
+      unavailable_15_16
+      unavailable_16_17
+      unavailable_17_18
+      unavailable_18_19
+      unavailable_19_20
+      unavailable_20_21
+      unavailable_21_22
+      unavailability_notes
     ]
   end
 end
