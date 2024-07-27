@@ -89,9 +89,10 @@ module ResourceMethods
         before_update
         # updates does the save as well, need to assign without saving to determine if there is a change
         @object.assign_attributes(strip_params(_permitted_params(model: object_name, instance: @object)))
-        changed = @object.changed?
         # Then we can "save"
         @object.save!
+        changed = @object.saved_changes?
+        # Rails.logger.debug("&****** has dirty #{@object.has_dirty_associations}")
         @object.reload
         after_update
       end
@@ -99,6 +100,7 @@ module ResourceMethods
     ret = after_update_tx
     return if ret
   
+    # also if relationships changed ....
     if changed
       render_object(@object)
     else
@@ -230,11 +232,17 @@ module ResourceMethods
 
     @per_page, @current_page, @filters = collection_params
 
+
     q = if select_fields
           select_fields
         else
           policy_scope(base, policy_scope_class: policy_scope_class)
         end
+
+    if default_scope(query: q)
+      q = default_scope(query: q)
+    end
+
     q = q.includes(includes)
          .references(references)
          .eager_load(eager_load)
@@ -243,7 +251,7 @@ module ResourceMethods
          .where(collection_where)
         #  anpther where?
 
-    q = q.distinct if join_tables && !join_tables.empty?
+    q = q.distinct if (join_tables && !join_tables.empty?) || make_distinct?
 
     q = q.order(order_string)
 
@@ -253,16 +261,8 @@ module ResourceMethods
     # Rails.logger.debug "****************************"
     # Rails.logger.debug "****************************"
 
-    # TODO we need the size without the query
     if paginated
-      @full_collection_total = policy_scope(base, policy_scope_class: policy_scope_class)
-                            .where(exclude_deleted_clause)
-                            .includes(includes)
-                            .references(references)
-                            .eager_load(eager_load)
-                            .joins(join_tables)
-                            .distinct
-                            .count
+      @full_collection_total = collection_total
       instance_variable_set("@#{controller_name}", @full_collection_total)
     end
 
@@ -271,6 +271,27 @@ module ResourceMethods
     else
       q
     end
+  end
+
+  def collection_total
+    base = if belong_to_class && belongs_to_param_id
+             parent = belong_to_class.find belongs_to_param_id
+             parent.send(belongs_to_relationship)
+           else
+             model_class
+           end
+
+    fq = policy_scope(base, policy_scope_class: policy_scope_class)
+    if default_scope(query: fq)
+      fq = default_scope(query: fq)
+    end      
+    fq.where(exclude_deleted_clause)
+      .includes(includes)
+      .references(references)
+      .eager_load(eager_load)
+      .joins(join_tables)
+      .distinct
+      .count
   end
 
   def query(filters = nil)
@@ -527,6 +548,10 @@ module ResourceMethods
     nil
   end
 
+  def default_scope(query: nil)
+    nil
+  end
+
   def model_name
     "#{model_class}"
   end
@@ -746,6 +771,10 @@ module ResourceMethods
   end
 
   def array_col?(col_name:)
+    false
+  end
+
+  def make_distinct?
     false
   end
 

@@ -66,6 +66,8 @@
 #  published_name                  :string
 #  published_name_sort_by          :string
 #  reddit                          :string
+#  reg_attending_status            :string
+#  reg_match                       :enum             default("none")
 #  registered                      :boolean          default(FALSE), not null
 #  registration_number             :string
 #  registration_type               :string
@@ -91,6 +93,7 @@
 #
 # Indexes
 #
+#  idx_people_reg_id                     (reg_id) UNIQUE
 #  index_people_on_bio                   (bio) USING gin
 #  index_people_on_confirmation_token    (confirmation_token) UNIQUE
 #  index_people_on_name                  (name) USING gin
@@ -111,10 +114,11 @@ class Person < ApplicationRecord
   # TODO: add a deleted_at mechanism for soft deletes
 
   include PasswordArchivable
-  # acts_as_taggable
-  acts_as_taggable_on :tags
+  include DirtyAssociations
 
-  has_paper_trail versions: { class_name: 'Audit::PersonVersion' }, ignore: [:updated_at, :created_at, :lock_version, :integrations]
+  has_paper_trail versions: { class_name: 'Audit::PersonVersion' },
+                  ignore: [:updated_at, :created_at, :lock_version, :integrations],
+                  limit: nil
 
   before_destroy :check_if_assigned
   before_save :check_primary_email
@@ -193,7 +197,9 @@ class Person < ApplicationRecord
   has_many  :mailings, through: :person_mailing_assignments
   has_many  :mail_histories
 
-  has_many  :email_addresses, dependent: :destroy
+  has_many  :email_addresses, dependent: :destroy,
+            after_add: :dirty_associations,
+            after_remove: :dirty_associations
   accepts_nested_attributes_for :email_addresses, reject_if: :all_blank, allow_destroy: true
 
   has_many :oauth_identities
@@ -217,7 +223,10 @@ class Person < ApplicationRecord
   # ?????
 
   # This is what has also been referred to as "class" of person
-  has_many :convention_roles, dependent: :destroy
+  has_many :convention_roles, 
+    dependent: :destroy,
+    after_add: :dirty_associations,
+    after_remove: :dirty_associations
   accepts_nested_attributes_for :convention_roles, allow_destroy: true
 
   has_and_belongs_to_many :application_roles, class_name: 'ApplicationRole'
@@ -253,6 +262,8 @@ class Person < ApplicationRecord
     declined: 'declined',
     rejected: 'rejected'
   }
+
+  enum reg_match: {none: 'none', automatic: 'automatic', assisted: 'assisted', manual: 'manual', self: 'self'}, _scopes: false
 
   nilify_blanks only: [
     :bio,
