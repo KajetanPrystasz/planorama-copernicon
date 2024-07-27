@@ -11,12 +11,12 @@
 </div>
 </template>
 <script>
-import TwoSidedMultiSelect from "@/components/two_sided_multi_select.vue";
+import PersonSyncTable from "@/registrations/person_sync_table.vue"
 
 export default {
   name: "PlayGroundComponent",
   components: {
-    TwoSidedMultiSelect
+    PersonSyncTable
   },
   data: () => ({
     multiSelectOptions: ["jeden", "dwa", "trzy", "cztery", "pięć", "sześć"],

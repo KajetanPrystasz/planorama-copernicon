@@ -19,11 +19,11 @@ export const session_columns = [
     stickyColumn: true
   },
   {
-    key: 'solicitor_name',
-    sortKey: 'sessions.solicitor_name',
-    label: 'Osoba',
-    type: 'text',
-    sortable: false
+    key: 'short_title',
+    sortKey: 'sessions.short_title',
+    label: 'Short Title',
+    type: "text",
+    sortable: true
   },
   {
     key: 'description',

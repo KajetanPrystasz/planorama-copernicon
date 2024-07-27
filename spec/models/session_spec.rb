@@ -2,6 +2,43 @@
 #
 # Table name: sessions
 #
+#  id                        :uuid             not null, primary key
+#  audience_size             :integer
+#  description               :text
+#  duration                  :integer
+#  environment               :enum             default("unknown")
+#  instructions_for_interest :text
+#  interest_opened_at        :datetime
+#  interest_opened_by        :string
+#  is_break                  :boolean          default(FALSE)
+#  item_notes                :text
+#  lock_version              :integer          default(0)
+#  maximum_people            :integer
+#  minimum_people            :integer
+#  minors_participation      :jsonb
+#  open_for_interest         :boolean          default(FALSE)
+#  participant_notes         :text
+#  proofed                   :boolean          default(FALSE), not null
+#  pub_reference_number      :integer
+#  publish                   :boolean          default(FALSE), not null
+#  recorded                  :boolean          default(FALSE), not null
+#  require_signup            :boolean          default(FALSE)
+#  room_notes                :text
+#  short_title               :string(30)
+#  start_time                :datetime
+#  status                    :enum             default("draft")
+#  streamed                  :boolean          default(FALSE), not null
+#  tech_notes                :text
+#  title                     :string(256)
+#  updated_by                :string
+#  visibility                :enum             default("is_public")
+#  waiting_list_size         :integer          default(0)
+#  created_at                :datetime         not null
+#  updated_at                :datetime         not null
+#  age_restriction_id        :uuid
+#  format_id                 :uuid
+#  room_id                   :uuid
+#  room_set_id               :uuid
 #  id                           :uuid             not null, primary key
 #  abstract_url                 :string
 #  accessibility                :string(1000)     default("")

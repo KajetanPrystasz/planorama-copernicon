@@ -17,8 +17,11 @@ class Reports::SessionReportsController < ApplicationController
       [
         'Session',
         'Start Time',
+        'Duration',
         'Room',
         'Environment',
+        'Livestreamed',
+        'Recorded',
         'Format',
         'Areas',
         'Tags',
@@ -29,15 +32,16 @@ class Reports::SessionReportsController < ApplicationController
       ]
     )
 
-    # require room features.services, tech/hotel notes, room setup
-
     sessions.each do |session|
       worksheet.append_row(
         [
           session.title,
           session.start_time ? FastExcel.date_num(session.start_time, session.start_time.in_time_zone.utc_offset) : nil,
+          session.duration,
           session.room&.name,
           session.environment,
+          session.streamed ? 'Yes' : 'No',
+          session.recorded ? 'Yes' : 'No',
           session.format&.name,
           session.area_list.sort.join(';'),
           session.tags_array&.join("; "),
@@ -131,7 +135,7 @@ class Reports::SessionReportsController < ApplicationController
     sessions.each do |session|
       worksheet.append_row(
         [
-          session.title,
+          session.short_title || session.title,
           session.area_list.sort.join(';'),
           session.tags_array&.join("; "),
           session.labels_array&.join("; "),
@@ -330,7 +334,7 @@ class Reports::SessionReportsController < ApplicationController
 
     people_sessions = SessionService.person_schedule
                         .where("session_assignment_name in ('Moderator', 'Participant', 'Invisible')")
-                        .where("con_state not in ('not_set', 'accepted')")
+                        .where("con_state not in ('accepted')")
                         .where("start_time is not null and room_id is not null")
                         .order('name', 'start_time', 'title')
 
