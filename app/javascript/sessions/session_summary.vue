@@ -17,6 +17,22 @@
         </b-form-group>
         <b-form-group
           class="mx-3"
+          id="session-short-title-group"
+          label="Session Short Title"
+          label-for="session-short-title"
+          :description="shortTitleLengthMessage"
+        >
+          <b-form-input
+            id="session-short-title"
+            type="text"
+            v-model="session.short_title"
+            maxlength="30"
+            @input="setShortTitleLength($event)"
+            @blur="saveSession()"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group
+          class="mx-3"
           id="session-description-group"
           label="Session Description"
           label-for="session-description"
@@ -138,11 +154,15 @@ export default {
   ],
   data: () => ({
     SESSION_STATUS,
-    SESSION_MUST_UNSCHEDULE
+    SESSION_MUST_UNSCHEDULE,
+    sessionShortTitleLength: 0
   }),
   computed: {
     session() {
       return this.selected_model(sessionModel);
+    },
+    shortTitleLengthMessage() {
+      return `${this.sessionShortTitleLength}/30 characters used`;
     },
     visibility: {
       get() {
@@ -163,8 +183,11 @@ export default {
     },
     resyncAirmeet() {
       this.toastPromise(this.$store.dispatch('jv/get', `${publishedSessionEndpoints[publishedSessionModel]}/${this.session.id}/resync_airmeet`), "Successfully updated airmeet sync data.")
+    },
+    setShortTitleLength(event) {
+      this.sessionShortTitleLength = event?.length ?? 0;
     }
-  }
+  },
 }
 </script>
 

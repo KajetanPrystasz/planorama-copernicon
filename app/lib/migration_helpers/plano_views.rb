@@ -14,23 +14,64 @@ module MigrationHelpers
 
       # view for reg matching
       self.create_registration_sync_matches
+      self.create_filtered_registration_sync_matches
       self.create_registration_map_counts
       self.create_registration_map_reg_counts
       self.create_registration_map_people_counts
     end
 
+    def self.create_filtered_registration_sync_matches
+      query = <<-SQL.squish
+        CREATE OR REPLACE VIEW filtered_registration_sync_matches AS
+          select * from registration_sync_matches rsm 
+          where rsm.reg_id not in (select p2.reg_id from people p2 where  p2.reg_id is not null)
+      SQL
+
+      ActiveRecord::Base.connection.execute(query)
+    end
+
     def self.create_registration_sync_matches
       query = <<-SQL.squish
-        CREATE OR REPLACE VIEW registration_sync_matches AS
+        DROP materialized VIEW IF EXISTS registration_sync_matches;
+        CREATE MATERIALIZED VIEW registration_sync_matches AS
           select p.name, null as email, p.id as pid, rsd.reg_id, rsd.id as rid, 'name' as mtype
           from people p 
           join registration_sync_data rsd
-          on rsd."name" ilike p.name
+          on 
+          (
+            rsd."name" ilike p.name OR
+            rsd."preferred_name" ilike p.name OR
+            rsd."badge_name" ilike p.name
+            or rsd."name" ilike p.pseudonym
+            or rsd."preferred_name" ilike p.pseudonym
+            or rsd."badge_name" ilike p.pseudonym
+          )
+          where
+          concat(p.id, '-', rsd.reg_id) not in 
+          (select concat(drsm.person_id, '-' , drsm.reg_id) from dismissed_reg_sync_matches drsm)
           union
-          select null as name, e.email, e.person_id as pid, rsd.reg_id, rsd.id as rid, 'email' as mtype
-          from email_addresses e 
-          join registration_sync_data rsd 
-          on rsd."email" ilike e.email
+          select null as name, e.email, e.person_id as pid, rsd2.reg_id, rsd2.id as rid, 'email' as mtype
+          from email_addresses e
+          join registration_sync_data rsd2 
+          on 
+          (
+            rsd2."email" ilike e.email or
+            rsd2."alternative_email" ilike e.email
+          )
+          where e.isdefault = true
+          and 
+          concat(e.person_id, '-', rsd2.reg_id) not in 
+          (select concat(drsm.person_id, '-' , drsm.reg_id) from dismissed_reg_sync_matches drsm);
+        CREATE INDEX matches_reg_id ON registration_sync_matches (reg_id);
+        CREATE INDEX matches_pid ON registration_sync_matches (pid);
+      SQL
+
+      ActiveRecord::Base.connection.execute(query)
+    end
+
+    def self.refresh_registration_sync_matches
+      query = <<-SQL.squish
+        REFRESH MATERIALIZED VIEW registration_sync_matches;
       SQL
 
       ActiveRecord::Base.connection.execute(query)
@@ -40,7 +81,9 @@ module MigrationHelpers
       query = <<-SQL.squish
         CREATE OR REPLACE VIEW registration_map_counts AS
           select rsm.reg_id, rsm.pid, count(rsm.pid) as sub_count 
-          from registration_sync_matches rsm 
+          from registration_sync_matches rsm
+          where rsm.pid not in (select person_id from dismissed_reg_sync_matches)
+          and rsm.reg_id not in (select reg_id from dismissed_reg_sync_matches)
           group by rsm.reg_id, rsm.pid
       SQL
 
@@ -98,6 +141,8 @@ module MigrationHelpers
             sessions.description,
             sessions.environment,
             sessions.status,
+            sessions.streamed,
+            sessions.recorded,
             case
             when sa.updated_at > sessions.updated_at
           		then sa.updated_at
@@ -570,6 +615,15 @@ module MigrationHelpers
       ActiveRecord::Base.connection.execute(query)
     end
 
+    def self.test_registration_sync_matches_type
+      query = <<-SQL.squish
+        select relkind from pg_catalog.pg_class where relname = 'registration_sync_matches';
+      SQL
+
+      res = ActiveRecord::Base.connection.execute(query)
+      res.first["relkind"]
+    end
+
     def self.drop_views
       ActiveRecord::Base.connection.execute <<-SQL
         DROP VIEW IF EXISTS session_conflicts;
@@ -615,8 +669,18 @@ module MigrationHelpers
       SQL
 
       ActiveRecord::Base.connection.execute <<-SQL
-        DROP VIEW IF EXISTS registration_sync_matches;
+        DROP VIEW IF EXISTS filtered_registration_sync_matches;
       SQL
+
+      if self.test_registration_sync_matches_type == 'm'
+        ActiveRecord::Base.connection.execute <<-SQL
+          DROP materialized VIEW IF EXISTS registration_sync_matches;
+        SQL
+      else
+        ActiveRecord::Base.connection.execute <<-SQL
+          DROP VIEW IF EXISTS registration_sync_matches;
+        SQL
+      end
     end
   end
 end
