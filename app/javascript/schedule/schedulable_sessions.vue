@@ -1,27 +1,19 @@
 <template>
   <div class="all-scheduable-session">
-    <schedule-session-search
-      :value="filter"
-      @change="onSearchChanged"
-    ></schedule-session-search>
-    <div class="all-scheduable-session-list">
-      <div
-        class="scheduable-session mb-1"
-        v-for="session in sortedCollection" :key="session.id"
-        draggable="true"
-        @dragstart="onEventDragStart($event, session)"
-      >
-        <strong>{{session.title}}</strong>
-        ({{ session.duration ? `${session.duration} min` : 'no duration' }})
+    <schedule-session-search :value="filter" @change="onSearchChanged"></schedule-session-search>
+    <b-overlay :show="tableBusy" rounded="sm">
+      <div class="all-scheduable-session-list">
+        <div class="scheduable-session mb-1" v-for="session in sortedCollection" :key="session.id" draggable="true"
+          @dragstart="onEventDragStart($event, session)"
+          @click="onSelectEvent($event, session)"
+        >
+          <strong>{{session.title}}</strong>
+          ({{ session.duration ? `${session.duration} min` : 'no duration' }})
+        </div>
       </div>
-    </div>
-    <b-pagination class="d-flex"
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
-      size="sm"
-      align="center"
-    ></b-pagination>
+    </b-overlay>
+    <b-pagination class="d-flex" v-model="currentPage" :total-rows="totalRows" :per-page="perPage" size="sm"
+      align="center"></b-pagination>
   </div>
 </template>
 
@@ -51,6 +43,12 @@ export default {
       // Passing the event's data to Vue Cal through the DataTransfer object.
       e.dataTransfer.setData('event', JSON.stringify(draggable))
       e.dataTransfer.setData('cursor-grab-at', e.offsetY)
+    },
+    pillClass(color) {
+      return `badge badge-pill mr-1 badge-${color} mr-1`
+    },
+    onSelectEvent(e, session) {
+      this.select(session.id)
     }
   },
   mounted() {
@@ -62,10 +60,10 @@ export default {
 <style lang="scss">
 @import '../stylesheets/style.scss';
 
-
 .all-scheduable-session-list {
   overflow-y: scroll;
   max-height: 200px;
+  min-height: 200px;
 }
 
 .scheduable-session {

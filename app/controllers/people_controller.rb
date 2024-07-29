@@ -43,8 +43,26 @@ class PeopleController < ResourceController
 
       IdentityService.update_reg_info(person: person, details: details['data'])
 
+      # Also need to update the datum
+      update_datum(details['data'])
+
       render_object(person)
     end
+  end
+
+  def update_datum(data)
+      datum = RegistrationSyncDatum.find_by reg_id: data['id']
+      if datum
+        datum.update(
+            name: data['full_name']&.strip,
+            email: data['email']&.strip,
+            registration_number: data['ticket_number']&.strip,
+            preferred_name: data['preferred_name']&.strip,
+            alternative_email: data['alternative_email']&.strip,
+            badge_name: data['badge']&.strip,
+            raw_info: data
+          )
+      end
   end
 
   def unlink_registration 
@@ -110,7 +128,7 @@ class PeopleController < ResourceController
     person = Person.find params[:person_id]
 
     if person
-      schedule = SessionService.draft_schedule_for(person: person, current_person: current_person)
+      schedule = SessionService.draft_schedule_for(person: person, current_person: current_person, show_links: true)
       render json: schedule, content_type: 'application/json'
     end
   end
@@ -460,7 +478,8 @@ class PeopleController < ResourceController
     [
       :email_addresses,
       :convention_roles,
-      :person_schedule_approvals
+      :person_schedule_approvals,
+      :session_limits
     ]
   end
 

@@ -34,6 +34,7 @@
 #  recorded                     :boolean          default(FALSE), not null
 #  require_signup               :boolean          default(FALSE)
 #  room_notes                   :text
+#  short_title               :string(30)
 #  rpg_for_beginners            :boolean
 #  rpg_hardness                 :text
 #  rpg_knowledge_needed         :boolean
@@ -86,12 +87,15 @@
 class Session < ApplicationRecord
   include XmlFormattable
   include Aggregates
+  include DirtyAssociations
 
   validates_presence_of :title
   validates_numericality_of :duration, allow_nil: true
   validates_numericality_of :minimum_people, allow_nil: true
   validates_numericality_of :maximum_people, allow_nil: true
   validates_numericality_of :audience_size, allow_nil: true
+
+  validates_length_of :short_title, maximum: 30, allow_nil: true
 
   # NOTE: when we have a config for default duration change to use a lambda
   attribute :duration, default: 60
@@ -117,7 +121,8 @@ class Session < ApplicationRecord
     :tech_notes,
     :participant_notes,
     :instructions_for_interest,
-    :room_notes
+    :room_notes,
+    :short_title
   ]
 
   has_many :session_conflicts,
@@ -189,8 +194,12 @@ class Session < ApplicationRecord
   # has_many :participants, through: :participant_assignments #, source: :person, class_name: 'Person'
 
   # TODO: Will also need a published versioon of the relationship
-  has_many :session_areas, inverse_of: :session
-  has_many :areas, through: :session_areas
+  has_many :session_areas, inverse_of: :session,
+           after_add: :dirty_associations,
+           after_remove: :dirty_associations
+  has_many :areas, through: :session_areas,
+           after_add: :dirty_associations,
+           after_remove: :dirty_associations
   accepts_nested_attributes_for :session_areas, allow_destroy: true
   # accepts_nested_attributes_for :areas, allow_destroy: true
 
@@ -248,7 +257,8 @@ class Session < ApplicationRecord
   end
 
   def published?
-    !published_session.nil?
+    # No need to load the whole record ...
+    PublishedSession.exists?(session_id: self.id)
   end
 
   def keep_who_did_it
@@ -265,32 +275,20 @@ class Session < ApplicationRecord
   end
 
   def self.conflict_counts
-    sessions = Session.arel_table
     conflicts = Conflicts::SessionConflict.arel_table
     ignored_conflicts = ::IgnoredConflict.arel_table
 
-    sessions.project(
-      sessions[:id].as('session_id'),
+    conflicts.project(
+      conflicts[:session_id].as('session_id'),
       conflicts[:session_id].count.as('conflict_count')
     )
-    .join(conflicts, Arel::Nodes::OuterJoin)
-    .on(
-      sessions[:id].eq(conflicts[:session_id])
-      .or(
-        sessions[:id].eq(conflicts[:conflict_session_id])
-        .and(
-          conflicts[:conflict_type].not_eq('room_conflict')
-          .or(
-            conflicts[:conflict_type].eq('room_conflict')
-            .and(
-              conflicts[:session_start_time].not_eq(conflicts[:conflict_session_start_time])
-            )
+    .where(
+      conflicts[:conflict_type].not_eq('room_conflict')
+        .or(
+          conflicts[:conflict_type].eq('room_conflict')
+          .and(
+            conflicts[:session_start_time].not_eq(conflicts[:conflict_session_start_time])
           )
-          # .and(
-          #   conflicts[:conflict_type].not_eq('person_schedule_conflict')
-          #   .and(conflicts[:conflict_type].not_eq('person_back_to_back'))
-          # )
-        )
       )
       .and(
         conflicts[:session_assignment_name].eq(nil).or(conflicts[:session_assignment_name].in(['Moderator', 'Participant', 'Invisible'])).and(
@@ -302,7 +300,7 @@ class Session < ApplicationRecord
         )
       )
     )
-    .group('sessions.id')
+    .group('session_conflicts.session_id')
   end
 
   def schedule_consistency

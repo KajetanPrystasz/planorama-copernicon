@@ -293,6 +293,9 @@ module.exports = {
         global_diaspora: "Członek globalnej diaspory",
         non_anglophone: "Reprezentuje coś innego niż czysto anglojęzyczna perspektywa",
         excluded_demographic_categories: "Kategorie demograficzne uczestnika, które nie powinny być omawiane na panelach, w których uczestniczy",
+        registered: "Registered",
+        registration_type: "Registration Type",
+        reg_attending_status: "Registration Attending Status",
     },
     PERSON_SAVE_SUCCESS: PERSON_SAVE_SUCCESS,
     PERSON_NEVER_LOGGED_IN: "Nigdy nie zalogowano",
@@ -318,7 +321,7 @@ module.exports = {
     },
 
     PERSON_ATTENDANCE_TYPE: {
-        'in person': "Osobiście",
+        in_person: "Osobiście",
         hybrid: "Osobiście I Online",
         virtual: "Online",
     },
@@ -381,4 +384,9 @@ module.exports = {
     PROFILE_LINK_EXPLAINATION_1: "Po połączeniu konta Planorama z kontem rejestracyjnym zostaną one powiązane, a następnie zostaniesz poproszony o potwierdzenie właściwego konta rejestracyjnego.",
     PROFILE_LINK_EXPLAINATION_2: "Dalej będziesz logować się do Planorama przy użyciu hasła, które utworzyłeś, a nie danych logowania do konta rejestracyjnego.",
     PROFILE_LINK_EXPLAINATION_TITLE: "Co oznacza połączenie z rejestracją?",
+    REG_ID_SEARCH_PLACEHOLDER: "Search for a ticket number.",
+    REG_ID_FOUND: "Found a match in the registration database",
+    REG_ID_NOT_FOUND: "No results found. Please check your input.",
+    REG_ID_UNLINK_BUTTON: "Unlink Current Registration",
+    REG_ID_UNLINK_CONFIRMATION_TITLE: "",
 }

@@ -224,6 +224,19 @@ CREATE TYPE public.phone_type_enum AS ENUM (
 
 
 --
+-- Name: reg_match_enum; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.reg_match_enum AS ENUM (
+    'none',
+    'automatic',
+    'assisted',
+    'manual',
+    'self'
+);
+
+
+--
 -- Name: schedule_approval_enum; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -667,6 +680,8 @@ END) STORED,
     non_anglophone character varying,
     fediverse character varying,
     bsky character varying,
+    reg_attending_status character varying,
+    reg_match public.reg_match_enum DEFAULT 'none'::public.reg_match_enum
     of_age_at_convention_time boolean DEFAULT false,
     phone_number character varying(100) DEFAULT ''::character varying,
     surname character varying,
@@ -759,6 +774,7 @@ CREATE TABLE public.sessions (
     room_notes text,
     recorded boolean DEFAULT false NOT NULL,
     streamed boolean DEFAULT false NOT NULL,
+    short_title character varying(30) DEFAULT NULL::character varying,
     format_description text DEFAULT ''::text,
     rpg_system character varying,
     rpg_knowledge_needed boolean,
@@ -965,6 +981,20 @@ CREATE TABLE public.curated_tags (
 
 
 --
+-- Name: dismissed_reg_sync_matches; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dismissed_reg_sync_matches (
+    id uuid DEFAULT public.gen_random_uuid() NOT NULL,
+    person_id uuid NOT NULL,
+    reg_id character varying NOT NULL,
+    lock_version integer,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
 -- Name: email_addresses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1059,6 +1089,22 @@ CREATE TABLE public.integrations (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     lock_version integer DEFAULT 0
+);
+
+
+--
+-- Name: job_statuses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.job_statuses (
+    id uuid DEFAULT public.gen_random_uuid() NOT NULL,
+    status character varying,
+    submit_time timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    lock_version integer DEFAULT 0,
+    type character varying,
+    result jsonb
 );
 
 
@@ -1326,6 +1372,8 @@ CREATE VIEW public.person_schedules AS
     sessions.description,
     sessions.environment,
     sessions.status,
+    sessions.streamed,
+    sessions.recorded,
         CASE
             WHEN (sa.updated_at > sessions.updated_at) THEN sa.updated_at
             ELSE sessions.updated_at
@@ -1560,20 +1608,6 @@ CREATE TABLE public.publication_dates (
 
 
 --
--- Name: publication_statuses; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.publication_statuses (
-    id uuid DEFAULT public.gen_random_uuid() NOT NULL,
-    status character varying,
-    submit_time timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    lock_version integer DEFAULT 0
-);
-
-
---
 -- Name: publish_snapshots; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1631,7 +1665,8 @@ CREATE TABLE public.published_sessions (
     minors_participation jsonb,
     recorded boolean DEFAULT false NOT NULL,
     streamed boolean DEFAULT false NOT NULL,
-    integrations jsonb DEFAULT '{}'::jsonb NOT NULL
+    integrations jsonb DEFAULT '{}'::jsonb NOT NULL,
+    short_title character varying(30) DEFAULT NULL::character varying
 );
 
 
@@ -1650,15 +1685,16 @@ CREATE TABLE public.registration_sync_data (
     raw_info jsonb DEFAULT '{}'::jsonb NOT NULL,
     lock_version integer,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    badge_name character varying
 );
 
 
 --
--- Name: registration_sync_matches; Type: VIEW; Schema: public; Owner: -
+-- Name: registration_sync_matches; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.registration_sync_matches AS
+CREATE MATERIALIZED VIEW public.registration_sync_matches AS
  SELECT p.name,
     NULL::character varying AS email,
     p.id AS pid,
@@ -1666,7 +1702,7 @@ CREATE VIEW public.registration_sync_matches AS
     rsd.id AS rid,
     'name'::text AS mtype
    FROM (public.people p
-     JOIN public.registration_sync_data rsd ON (((rsd.name)::text ~~* (p.name)::text)))
+     JOIN public.registration_sync_data rsd ON ((((rsd.name)::text ~~* (p.name)::text) OR ((rsd.preferred_name)::text ~~* (p.name)::text) OR ((rsd.badge_name)::text ~~* (p.name)::text) OR ((rsd.name)::text ~~* (p.pseudonym)::text) OR ((rsd.preferred_name)::text ~~* (p.pseudonym)::text) OR ((rsd.badge_name)::text ~~* (p.pseudonym)::text))))
 UNION
  SELECT NULL::character varying AS name,
     e.email,
@@ -1675,7 +1711,9 @@ UNION
     rsd.id AS rid,
     'email'::text AS mtype
    FROM (public.email_addresses e
-     JOIN public.registration_sync_data rsd ON (((rsd.email)::text ~~* (e.email)::text)));
+     JOIN public.registration_sync_data rsd ON ((((rsd.email)::text ~~* (e.email)::text) OR ((rsd.alternative_email)::text ~~* (e.email)::text))))
+  WHERE (e.isdefault = true)
+  WITH NO DATA;
 
 
 --
@@ -1687,6 +1725,9 @@ CREATE VIEW public.registration_map_counts AS
     rsm.pid,
     count(rsm.pid) AS sub_count
    FROM public.registration_sync_matches rsm
+  WHERE ((NOT (rsm.pid IN ( SELECT dismissed_reg_sync_matches.person_id
+           FROM public.dismissed_reg_sync_matches))) AND (NOT ((rsm.reg_id)::text IN ( SELECT dismissed_reg_sync_matches.reg_id
+           FROM public.dismissed_reg_sync_matches))))
   GROUP BY rsm.reg_id, rsm.pid;
 
 
@@ -2244,6 +2285,15 @@ CREATE TABLE public.tags (
 
 
 --
+-- Name: tt; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tt (
+    relkind "char"
+);
+
+
+--
 -- Name: venues; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2479,6 +2529,14 @@ ALTER TABLE ONLY public.curated_tags
 
 
 --
+-- Name: dismissed_reg_sync_matches dismissed_reg_sync_matches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dismissed_reg_sync_matches
+    ADD CONSTRAINT dismissed_reg_sync_matches_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: email_addresses email_addresses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2703,10 +2761,10 @@ ALTER TABLE ONLY public.publication_dates
 
 
 --
--- Name: publication_statuses publication_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: job_statuses publication_statuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.publication_statuses
+ALTER TABLE ONLY public.job_statuses
     ADD CONSTRAINT publication_statuses_pkey PRIMARY KEY (id);
 
 
@@ -2982,6 +3040,20 @@ CREATE UNIQUE INDEX fl_configurations_unique_index ON public.configurations USIN
 
 
 --
+-- Name: idx_people_reg_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_people_reg_id ON public.people USING btree (reg_id);
+
+
+--
+-- Name: idx_person_reg_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_person_reg_id ON public.dismissed_reg_sync_matches USING btree (person_id, reg_id);
+
+
+--
 -- Name: idx_tagname_on_context; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3070,6 +3142,20 @@ CREATE INDEX index_audit_survey_versions_on_item_type_and_item_id ON public.audi
 --
 
 CREATE INDEX index_convention_roles_on_person_id ON public.convention_roles USING btree (person_id);
+
+
+--
+-- Name: index_dismissed_reg_sync_matches_on_person_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_dismissed_reg_sync_matches_on_person_id ON public.dismissed_reg_sync_matches USING btree (person_id);
+
+
+--
+-- Name: index_dismissed_reg_sync_matches_on_reg_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_dismissed_reg_sync_matches_on_reg_id ON public.dismissed_reg_sync_matches USING btree (reg_id);
 
 
 --
@@ -3269,6 +3355,20 @@ CREATE INDEX index_published_sessions_on_format_id ON public.published_sessions 
 
 
 --
+-- Name: index_registration_sync_data_on_alternative_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_registration_sync_data_on_alternative_email ON public.registration_sync_data USING gin (alternative_email public.gin_trgm_ops);
+
+
+--
+-- Name: index_registration_sync_data_on_badge_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_registration_sync_data_on_badge_name ON public.registration_sync_data USING gin (badge_name public.gin_trgm_ops);
+
+
+--
 -- Name: index_registration_sync_data_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3280,6 +3380,13 @@ CREATE INDEX index_registration_sync_data_on_email ON public.registration_sync_d
 --
 
 CREATE INDEX index_registration_sync_data_on_name ON public.registration_sync_data USING gin (name public.gin_trgm_ops);
+
+
+--
+-- Name: index_registration_sync_data_on_preferred_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_registration_sync_data_on_preferred_name ON public.registration_sync_data USING gin (preferred_name public.gin_trgm_ops);
 
 
 --
@@ -3567,6 +3674,20 @@ CREATE UNIQUE INDEX index_tags_on_name ON public.tags USING btree (name);
 --
 
 CREATE INDEX index_versions_on_item_type_and_item_id ON public.versions USING btree (item_type, item_id);
+
+
+--
+-- Name: matches_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX matches_pid ON public.registration_sync_matches USING btree (pid);
+
+
+--
+-- Name: matches_reg_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX matches_reg_id ON public.registration_sync_matches USING btree (reg_id);
 
 
 --
@@ -3889,6 +4010,16 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20240223134703'),
 ('20240226191153'),
 ('20240303213410'),
+('20240429160250'),
+('20240515001411'),
+('20240521184252'),
+('20240521193119'),
+('20240522174506'),
+('20240522190737'),
+('20240602172220'),
+('20240606115218'),
+('20240622165823'),
+('20240708121706');
 ('20240423130325'),
 ('20240715190003'),
 ('20240715190015'),

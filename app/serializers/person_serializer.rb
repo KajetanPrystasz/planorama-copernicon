@@ -72,6 +72,8 @@
 #  published_name                          :string
 #  published_name_sort_by                  :string
 #  reddit                                  :string
+#  reg_attending_status            :string
+#  reg_match                       :enum             default("none")
 #  registered                              :boolean          default(FALSE), not null
 #  registration_number                     :string
 #  registration_type                       :string
@@ -100,6 +102,7 @@
 #
 # Indexes
 #
+#  idx_people_reg_id                     (reg_id) UNIQUE
 #  index_people_on_bio                   (bio) USING gin
 #  index_people_on_confirmation_token    (confirmation_token) UNIQUE
 #  index_people_on_name                  (name) USING gin
@@ -160,7 +163,10 @@ class PersonSerializer #< ActiveModel::Serializer
               :excluded_demographic_categories,
               :global_diaspora,
               :non_anglophone,
-              :reg_id
+              :reg_id,
+              :reg_attending_status,
+              :date_reg_synced
+              :reg_match
 
   # status and comments hidden except for staff
   protected_attributes :con_state, :comments
@@ -168,10 +174,6 @@ class PersonSerializer #< ActiveModel::Serializer
   # Indicate whether the person has a password set
   protected_attribute :has_password do |person|
     !person.encrypted_password.blank?
-  end
-
-  attribute :tags do |person|
-    person.base_tags.collect(&:name)
   end
 
   attribute :session_count do |person|

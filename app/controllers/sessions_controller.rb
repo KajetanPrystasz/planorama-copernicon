@@ -350,12 +350,13 @@ class SessionsController < ResourceController
     ]
   end
 
+
   def eager_load
     [
       {session_areas: :area},
-      :areas,
-      :published_session,
-      {taggings: :tag}
+      # :areas,
+      # :published_session,
+      # {taggings: :tag}
     ]
   end
 
@@ -375,6 +376,7 @@ class SessionsController < ResourceController
 
   def join_tables
     sessions = Arel::Table.new(Session.table_name)
+    published_sessions = Arel::Table.new(PublishedSession.table_name)
 
     subquery = Session.area_list.as('areas_list')
     tags_subquery = Session.tags_list_table.as('tags_list_table')
@@ -406,7 +408,15 @@ class SessionsController < ResourceController
         conflict_counts,
         sessions.create_on(
           conflict_counts[:session_id].eq(sessions[:id])
-        )
+        ),
+        Arel::Nodes::OuterJoin
+      ),
+      sessions.create_join(
+        published_sessions,
+        sessions.create_on(
+          published_sessions[:session_id].eq(sessions[:id])
+        ),
+        Arel::Nodes::OuterJoin
       )
     ]
 
@@ -437,12 +447,14 @@ class SessionsController < ResourceController
     joins
   end
 
-  def select_fields
+  def select_fields    
     Session.select(
       ::Session.arel_table[Arel.star],
       'conflict_counts.conflict_count',
+      'areas_list.area_list',
       'tags_list_table.tags_array',
-      'labels_list_table.labels_array'
+      'labels_list_table.labels_array',
+      'published_sessions.session_id as is_published'
     )
   end
 
@@ -457,6 +469,7 @@ class SessionsController < ResourceController
       format_id
       room_set_id
       title
+      short_title
       description
       duration
       minimum_people

@@ -35,6 +35,7 @@
 #  recorded                     :boolean          default(FALSE), not null
 #  require_signup               :boolean          default(FALSE)
 #  room_notes                   :text
+#  short_title               :string(30)
 #  rpg_for_beginners            :boolean
 #  rpg_hardness                 :text
 #  rpg_knowledge_needed         :boolean
@@ -87,7 +88,7 @@ class SessionSerializer
   include JSONAPI::Serializer
 
   attributes :id, :lock_version, :created_at, :updated_at,
-             :title, :description,
+             :title, :short_title, :description,
              :duration, :minimum_people, :maximum_people,
              :item_notes, :pub_reference_number, :audience_size,
              :participant_notes, :is_break, :start_time,
@@ -111,15 +112,39 @@ class SessionSerializer
 
   # NOTE: session.tag_list would work, but if we prefetch taggings and tags this is faster (less DB queries)
   attribute :tag_list do |session|
-    session.taggings.select{|t| t.context == 'tags'}.collect(&:tag).collect(&:name)
+    if session.has_attribute? :tags_array
+      if session.tags_array
+        session.tags_array
+      else
+        []
+      end
+    else
+      session.taggings.select{|t| t.context == 'tags'}.collect(&:tag).collect(&:name)
+    end
   end
 
   attribute :label_list do |session|
-    session.taggings.select{|t| t.context == 'labels'}.collect(&:tag).collect(&:name)
+    if session.has_attribute? :labels_array
+      if session.labels_array
+        session.labels_array
+      else
+        []
+      end
+    else
+      session.taggings.select{|t| t.context == 'labels'}.collect(&:tag).collect(&:name)
+    end
   end
 
   attribute :area_list do |session|
-    session.areas.collect(&:name).sort{ |a, b| a.downcase <=> b.downcase }
+    if session.has_attribute? :area_list
+      if session.area_list
+        session.area_list
+      else
+        []
+      end
+    else
+      session.areas.collect(&:name).sort{ |a, b| a.downcase <=> b.downcase }
+    end
   end
 
   attribute :duration_mins do |session|
@@ -137,14 +162,18 @@ class SessionSerializer
 
   attribute :has_conflicts do |session|
     if session.has_attribute?(:conflict_count)
-      session.conflict_count > 0
+      session.conflict_count && session.conflict_count > 0
     else
       (session.session_conflicts.count > 0) || (session.conflict_sessions.count > 0)
     end
   end
 
   attribute :is_published do |session|
-    session.published?
+    if session.has_attribute?(:is_published)
+      session.is_published != nil
+    else
+      session.published?
+    end
   end
 
   has_many :session_areas, lazy_load_data: true, serializer: SessionAreaSerializer,

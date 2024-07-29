@@ -55,7 +55,7 @@
     </div>
 
     <div class="d-flex align-items-center">
-      <slot name="left-controls" :editableIds="editableIds"></slot>
+      <slot name="left-controls" v-bind:editableIds="editableIds" v-bind:total="fullTotalRows"></slot>
         <b-pagination
           class="mb-0 mr-3 ml-auto"
           v-model="currentPage"
@@ -79,6 +79,7 @@
     </div>
     <b-table
       hover bordered responsive selectable small striped
+      :sticky-header="stickyHeader"
       :fields="tableColumns"
       selected-variant="primary"
       :select-mode="useSelectMode"
@@ -129,11 +130,12 @@
       </template>
     </b-table>
 
-    <div class="d-flex mb-1">
+    <div class="d-flex mb-1" v-if="showBottomControls">
       <span v-if="totalRows != fullTotalRows">Wyniki wyszukiwania: {{totalRows}}</span>
       <span class="ml-auto">{{countCaption}}</span>
     </div>
     <b-pagination class="d-flex justify-content-end"
+      v-if="showBottomControls"
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
@@ -142,7 +144,7 @@
       prev-text="Poprzednia"
       next-text="Następna"
     ></b-pagination>
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end" v-if="showBottomControls">
       <b-form-group label="Liczba rekordów" label-cols="auto" class="mb-0">
         <b-form-select :options="[10, 20, 50]" v-model="perPage"></b-form-select>
       </b-form-group>
@@ -203,6 +205,13 @@ export default {
     stateName: {
       type: String,
       default: null
+    },
+    stickyHeader: {
+      default: false
+    },
+    showBottomControls: {
+      type: Boolean,
+      default: true
     }
   },
   data () {

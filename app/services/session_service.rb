@@ -9,7 +9,7 @@ module SessionService
   end
 
   # SessionService.draft_schedule_for(person: p)
-  def self.draft_schedule_for(person:, current_person: nil)
+  def self.draft_schedule_for(person:, current_person: nil, show_links: false)
     sched_table = ::PersonSchedule.arel_table
     subquery = Session.area_list.as('areas_list')
 
@@ -35,7 +35,17 @@ module SessionService
       .where("session_assignment_name in (?)",['Moderator', 'Participant', 'Invisible'])
 
 
-    PersonScheduleSerializer.new(schedule).serializable_hash
+    # PersonScheduleSerializer is the place
+    g24rce = Integration.find_by({name: 'g24rce'})
+    PersonScheduleSerializer.new(
+      schedule, 
+      {
+        params: {
+          show_links: show_links,
+          g24rce: (g24rce && g24rce[:config]) ? g24rce[:config]['base_portal_url'] : nil
+        }
+      }
+    ).serializable_hash
   end
 
   def self.scheduled_sessions
@@ -49,9 +59,13 @@ module SessionService
   def self.cache_published_sessions(publication_date:)
     sessions = self.published_sessions
 
+    g24rce = Integration.find_by({name: 'g24rce'})
     snapshot = ActiveModel::Serializer::CollectionSerializer.new(
                   sessions,
-                  serializer: Conclar::SessionSerializer
+                  {
+                    serializer: Conclar::SessionSerializer,
+                    g24rce: g24rce[:config] ? g24rce[:config]['base_portal_url'] : nil
+                  }
                 ) #.serializable_hash
 
     PublishSnapshot.create!(
@@ -91,7 +105,11 @@ module SessionService
       'labels_list_table.labels_array',
       'tags_list_table.tags_array'
     )
-      .includes(:format, :room, {participant_assignments: :person})
+      .includes(
+        :format, :room,
+        {participant_assignments: :person},
+        {taggings: :tag}
+      )
       .joins(self.area_subquery(clazz: PublishedSession))
       .joins(self.tags_subquery(clazz: PublishedSession))
       .joins(self.labels_subquery(clazz: PublishedSession))
@@ -120,20 +138,33 @@ module SessionService
       'labels_list_table.labels_array',
       'tags_list_table.tags_array'
     )
+      .includes(
+        :format, :room,
+        {taggings: :tag}
+      )
       .joins(self.area_subquery)
       .joins(self.tags_subquery)
       .joins(self.labels_subquery)
   end
 
   def self.draft_sessions
-    sessions.includes(:format, :room, {participant_assignments: :person})
+    sessions.includes(:format, :room)
       .where("start_time is not null and room_id is not null")
       .where("status != 'dropped'")
       .order(:start_time)
   end
 
   def self.live_sessions
-    sessions.includes(:format, :room, {participant_assignments: :person})
+    Session.select(
+      ::Session.arel_table[Arel.star],
+      'areas_list.area_list'
+    )
+      .includes(
+        :format, :room,
+        {participant_assignments: :person},
+        {taggings: :tag}
+      )
+      .joins(self.area_subquery)
       .where("start_time is not null and room_id is not null")
       .where("status != 'dropped' and status != 'draft'")
       .order(:start_time)

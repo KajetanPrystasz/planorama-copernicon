@@ -120,6 +120,9 @@ Rails.application.routes.draw do
   resources :integrations, path: 'integration', only: [:index, :update]
   get 'integration/airmeet', to: 'integrations#airmeet'
   get 'integration/clyde', to: 'integrations#clyde'
+  get 'integration/g24rce', to: 'integrations#g24rce'
+
+  get 'rce/schedule', to: 'rce#schedule'
 
   resources :availabilities, path: 'availability', except: [:index]
   resources :person_exclusions, path: 'person_exclusion', except: [:index]
@@ -203,6 +206,19 @@ Rails.application.routes.draw do
   resources :configurations, path: 'configuration'
   resources :parameter_names, path: 'parameter_name'
   resources :page_contents, path: 'page_content'
+
+  #
+  get 'registration_sync_data/sync_statistics', to: 'registration_sync_data#sync_statistics'
+  get 'registration_sync_data/synchronize', to: 'registration_sync_data#synchronize'
+  resources :registration_sync_data, path: 'registration_sync_datum' do
+    # This needs to work a bit different than the other sub relationships
+    get 'people', to: 'registration_sync_data#people'
+  end
+
+  get 'person_sync_datum/possible_match_count', to: 'person_sync_data#possible_match_count'
+  post 'person_sync_datum/dismiss_match', to: 'person_sync_data#dismiss_match'
+  post 'person_sync_datum/match', to: 'person_sync_data#match'
+  resources :person_sync_data, path: 'person_sync_datum'
 
   # Curated tags are the list of tags for a given context etc
   resources :curated_tags, path: 'curated_tag'

@@ -35,6 +35,7 @@
 #  recorded                     :boolean          default(FALSE), not null
 #  require_signup               :boolean          default(FALSE)
 #  room_notes                   :text
+#  short_title               :string(30)
 #  rpg_for_beginners            :boolean
 #  rpg_hardness                 :text
 #  rpg_knowledge_needed         :boolean
